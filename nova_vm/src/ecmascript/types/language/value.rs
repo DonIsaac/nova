@@ -59,7 +59,7 @@ use crate::{
         rootable::{HeapRootData, HeapRootRef, Rootable},
         small_f64::SmallF64,
     },
-    heap::{CompactionLists, HeapMarkAndSweep, WorkQueues},
+    heap::{CompactionLists, HeapMarkAndSweep, WorkQueues, subspace::SubspaceKey},
 };
 #[cfg(feature = "array-buffer")]
 use crate::{
@@ -268,7 +268,7 @@ pub(crate) const ARRAY_BUFFER_DISCRIMINANT: u8 =
     value_discriminant(Value::ArrayBuffer(ArrayBuffer::_def()));
 #[cfg(feature = "date")]
 pub(crate) const DATE_DISCRIMINANT: u8 = value_discriminant(Value::Date(Date::_def()));
-pub(crate) const ERROR_DISCRIMINANT: u8 = value_discriminant(Value::Error(Error::_def()));
+pub(crate) const ERROR_DISCRIMINANT: u8 = value_discriminant(Value::Error(Error::DEF));
 pub(crate) const BUILTIN_FUNCTION_DISCRIMINANT: u8 =
     value_discriminant(Value::BuiltinFunction(BuiltinFunction::_def()));
 pub(crate) const ECMASCRIPT_FUNCTION_DISCRIMINANT: u8 =

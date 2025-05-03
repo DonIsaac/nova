@@ -799,6 +799,7 @@ mod test {
         use crate::ecmascript::execution::{Agent, DefaultHostHooks, agent::Options};
         use crate::heap::indexes::BuiltinFunctionIndex;
         use crate::heap::indexes::ObjectIndex;
+        use crate::heap::subspace::SubspaceStorage as _;
 
         let mut agent = Agent::new(Options::default(), &DefaultHostHooks);
         let (mut gc, mut scope) = unsafe { GcScope::create_root() };

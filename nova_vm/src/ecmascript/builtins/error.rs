@@ -21,7 +21,9 @@ use crate::{
     },
     heap::{
         CompactionLists, CreateHeapData, Heap, HeapMarkAndSweep, ObjectEntry,
-        ObjectEntryPropertyDescriptor, WorkQueues, indexes::ErrorIndex,
+        ObjectEntryPropertyDescriptor, WorkQueues,
+        indexes::ErrorIndex,
+        subspace::{SubspaceKey, SubspaceStorage as _},
     },
 };
 
@@ -29,13 +31,17 @@ use crate::{
 #[repr(transparent)]
 pub struct Error<'a>(pub(crate) ErrorIndex<'a>);
 
-impl Error<'_> {
-    pub(crate) const fn _def() -> Self {
-        Self(ErrorIndex::from_u32_index(0))
-    }
+impl SubspaceKey for Error<'_> {
+    type HeapData = ErrorHeapData<'static>;
 
-    pub(crate) const fn get_index(self) -> usize {
+    const DEF: Self = Self(ErrorIndex::from_u32_index(0));
+
+    #[inline]
+    fn get_index(self) -> usize {
         self.0.into_index()
+    }
+    fn from_raw_index(index: usize) -> Self {
+        Self(ErrorIndex::from_index(index))
     }
 }
 
@@ -462,9 +468,9 @@ impl HeapMarkAndSweep for Error<'static> {
 
 impl<'a> CreateHeapData<ErrorHeapData<'a>, Error<'a>> for Heap {
     fn create(&mut self, data: ErrorHeapData<'a>) -> Error<'a> {
-        self.errors.push(Some(data.unbind()));
+        let idx = self.errors.alloc(data.unbind());
         self.alloc_counter += core::mem::size_of::<Option<ErrorHeapData<'static>>>();
-        Error(ErrorIndex::last(&self.errors))
+        idx
     }
 }
 
@@ -472,13 +478,13 @@ impl Index<Error<'_>> for Agent {
     type Output = ErrorHeapData<'static>;
 
     fn index(&self, index: Error) -> &Self::Output {
-        &self.heap.errors[index]
+        &self.heap.errors[index.unbind()]
     }
 }
 
 impl IndexMut<Error<'_>> for Agent {
     fn index_mut(&mut self, index: Error) -> &mut Self::Output {
-        &mut self.heap.errors[index]
+        &mut self.heap.errors[index.unbind()]
     }
 }
 

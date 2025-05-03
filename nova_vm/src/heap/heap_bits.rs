@@ -12,6 +12,7 @@ use super::{
     Heap,
     element_array::ElementDescriptor,
     indexes::{BaseIndex, ElementIndex, GetBaseIndexMut, IntoBaseIndex},
+    subspace::SubspaceStorage as _,
 };
 #[cfg(feature = "date")]
 use crate::ecmascript::builtins::date::Date;
@@ -362,7 +363,7 @@ impl WorkQueues {
             e_2_8: Vec::with_capacity(heap.elements.e2pow8.values.len() / 4),
             ecmascript_functions: Vec::with_capacity(heap.ecmascript_functions.len() / 4),
             embedder_objects: Vec::with_capacity(heap.embedder_objects.len() / 4),
-            errors: Vec::with_capacity(heap.errors.len() / 4),
+            errors: Vec::with_capacity(heap.errors.size() / 4),
             executables: Vec::with_capacity(heap.executables.len() / 4),
             source_codes: Vec::with_capacity(heap.source_codes.len() / 4),
             finalization_registrys: Vec::with_capacity(heap.finalization_registrys.len() / 4),

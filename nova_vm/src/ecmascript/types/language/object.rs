@@ -101,6 +101,7 @@ use crate::{
     },
     heap::{
         CompactionLists, CreateHeapData, Heap, HeapMarkAndSweep, WorkQueues, indexes::ObjectIndex,
+        subspace::SubspaceKey as _,
     },
 };
 

@@ -8,6 +8,7 @@ mod heap_constants;
 pub(crate) mod heap_gc;
 pub mod indexes;
 mod object_entry;
+pub mod subspace;
 
 use core::{cell::RefCell, ops::Index};
 
@@ -83,7 +84,7 @@ use crate::{
             source_code::SourceCodeHeapData,
         },
         types::{
-            BUILTIN_STRINGS_LIST, BigIntHeapData, BoundFunctionHeapData,
+            BUILTIN_STRINGS_LIST, BigInt, BigIntHeapData, BoundFunctionHeapData,
             BuiltinConstructorHeapData, BuiltinFunctionHeapData, ECMAScriptFunctionHeapData,
             HeapNumber, HeapString, NumberHeapData, Object, ObjectHeapData, OrdinaryObject,
             PropertyKey, String, StringHeapData, Symbol, SymbolHeapData, Value, bigint::HeapBigInt,
@@ -101,6 +102,7 @@ use element_array::{ElementDescriptor, ElementsVector};
 use hashbrown::HashTable;
 pub(crate) use heap_bits::{CompactionLists, HeapMarkAndSweep, WorkQueues};
 use indexes::TypedArrayIndex;
+use subspace::IsoSubspace;
 use wtf8::Wtf8;
 
 #[derive(Debug)]
@@ -132,7 +134,7 @@ pub struct Heap {
     pub elements: ElementArrays,
     pub embedder_objects: Vec<Option<EmbedderObjectHeapData>>,
     pub environments: Environments,
-    pub errors: Vec<Option<ErrorHeapData<'static>>>,
+    pub errors: IsoSubspace<crate::ecmascript::builtins::error::Error<'static>>, //Vec<Option<ErrorHeapData<'static>>>,
     /// Stores compiled bytecodes
     pub(crate) executables: Vec<ExecutableHeapData<'static>>,
     pub finalization_registrys: Vec<Option<FinalizationRegistryHeapData<'static>>>,
@@ -250,7 +252,7 @@ impl Heap {
             },
             embedder_objects: Vec::with_capacity(0),
             environments: Default::default(),
-            errors: Vec::with_capacity(1024),
+            errors: IsoSubspace::with_capacity(1024),
             executables: Vec::with_capacity(1024),
             source_codes: Vec::with_capacity(0),
             finalization_registrys: Vec::with_capacity(0),

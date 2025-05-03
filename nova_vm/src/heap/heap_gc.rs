@@ -14,6 +14,7 @@ use super::{
         sweep_heap_u32_elements_vector_values, sweep_heap_vector_values, sweep_lookup_table,
     },
     indexes::{ElementIndex, StringIndex},
+    subspace::{SubspaceKey as _, SubspaceStorage},
 };
 #[cfg(feature = "array-buffer")]
 use super::{heap_bits::sweep_side_table_values, indexes::TypedArrayIndex};
@@ -413,7 +414,7 @@ pub fn heap_gc(agent: &mut Agent, root_realms: &mut [Option<Realm<'static>>], gc
                     return;
                 }
                 *marked = true;
-                errors.get(index).mark_values(&mut queues);
+                errors.get(idx).mark_values(&mut queues);
             }
         });
         let mut executable_marks: Box<[Executable]> = queues.executables.drain(..).collect();
@@ -1320,9 +1321,10 @@ fn sweep(
                 sweep_heap_vector_values(embedder_objects, &compactions, &bits.embedder_objects);
             });
         }
-        if !errors.is_empty() {
+        if errors.size() != 0 {
             s.spawn(|| {
-                sweep_heap_vector_values(errors, &compactions, &bits.errors);
+                // sweep_heap_vector_values(errors, &compactions, &bits.errors);
+                errors.sweep(&compactions, &bits.errors)
             });
         }
         if !executables.is_empty() {
